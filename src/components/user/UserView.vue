@@ -23,7 +23,7 @@
       </el-row>
 
       <el-table :data="userList" style="width: 100%" stripe border>
-        <el-table-column prop="id" label="编号" width="70"></el-table-column>
+        <el-table-column type="index" width="50" label="编号"> </el-table-column>
         <el-table-column
           prop="username"
           label="姓名"
@@ -57,32 +57,23 @@
             </el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180">
-          <el-tooltip
-            effect="dark"
-            content="修改"
-            placement="top"
-            :enterable="false"
-          >
+        <el-table-column label="操作" width="120">
+          <template v-slot:default="scope">
             <el-button
+              v-model="scope.row"
               type="primary"
               icon="el-icon-edit"
               size="mini"
             ></el-button>
-          </el-tooltip>
-          <el-tooltip
-            effect="dark"
-            content="删除"
-            placement="top"
-            :enterable="false"
-          >
             <el-button
+              v-model="scope.row"
               type="danger"
               icon="el-icon-delete"
               size="mini"
+              @click="deleteUser(scope.row)"
             ></el-button>
-          </el-tooltip>
-          <el-tooltip
+          </template>
+          <!-- <el-tooltip
             effect="dark"
             content="分配角色"
             placement="top"
@@ -93,7 +84,7 @@
               icon="el-icon-setting"
               size="mini"
             ></el-button>
-          </el-tooltip>
+          </el-tooltip> -->
         </el-table-column>
       </el-table>
 
@@ -222,6 +213,41 @@ export default {
         }
       });
       this.isdialog = false;
+    },
+
+    //删除用户
+    async deleteUser(val) {
+      let id = { id: val.id };
+      const confirmResult = await this.$confirm(
+        "此操作将永久删除该用户, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+      //点击确定返回confirm 点击取消返回cancel 如果不加async+await返回的是一个premise
+      if (confirmResult !== "confirm") {
+        this.$message({
+          message: "取消删除",
+          type: "info",
+        });
+        return;
+      }
+      await axios({
+        method: "POST",
+        url: "/api/user/deleteUser",
+        params: id,
+      }).then((res) => {
+        if (res.data.num == 1) {
+          this.$message({
+            message: "删除成功",
+            type: "success",
+          });
+        }
+        this.getUserList();
+      });
     },
     //获取用户数据
     async getUserList() {

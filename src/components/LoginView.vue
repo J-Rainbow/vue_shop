@@ -5,7 +5,7 @@
         <img src="../assets/imgs/head.jpg" alt="" />
       </div>
       <div class="loginFrom">
-        <!-- :rules="loginRules" 验证规则 ref="loginFormRef"-->
+        <!-- :rules="loginRules" 验证规则 ref="loginFormRef"获取该表单-->
         <el-form
           label-width="80px"
           :model="loginForm"
