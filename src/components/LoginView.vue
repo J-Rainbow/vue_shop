@@ -41,12 +41,13 @@ export default {
   data() {
     return {
       loginForm: {
-        username: "",
-        password: "",
+        username: "admin",
+        password: "123456",
       },
       loginFormRules: {
+        //trigger: "blur"在鼠标离开时验证
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" }, //trigger: "blur"在鼠标离开时验证
+          { required: true, message: "请输入用户名", trigger: "blur" },
         ],
         password: [{ required: true, message: "请输入密码", trigger: "blur" }],
       },
@@ -64,9 +65,12 @@ export default {
       }).then((res) => {
         let msg = res.data.msg;
         if (msg == 1) {
-          alert("登录成功");
+          this.$router.push({ path: "/home" });
         } else {
-          alert("登录失败");
+          this.$message({
+            message: "用户名或密码错误",
+            type: "error",
+          });
         }
       });
     },
