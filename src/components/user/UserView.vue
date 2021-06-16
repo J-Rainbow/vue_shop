@@ -129,7 +129,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="isdialog = false">取 消</el-button>
-        <el-button type="primary" @click="isdialog = false">确 定</el-button>
+        <el-button type="primary" @click="addFrom">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -199,7 +199,30 @@ export default {
         }
       });
     },
-
+    //添加用户
+    async addFrom() {
+      if (
+        this.from.username == "" ||
+        this.from.password == "" ||
+        this.from.email == "" ||
+        this.from.mobile == ""
+      ) {
+        return;
+      }
+      await axios({
+        url: "api/user/addUser",
+        method: "POST",
+        params: this.from,
+      }).then((res) => {
+        if (res.data.num == 1) {
+          this.$message({
+            message: "添加用户成功",
+            type: "success",
+          });
+        }
+      });
+      this.isdialog = false;
+    },
     //获取用户数据
     async getUserList() {
       await axios({

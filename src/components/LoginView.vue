@@ -68,6 +68,7 @@ export default {
           this.$router.push({ path: "/home" });
         } else {
           this.$message({
+            //element ui 带有
             message: "用户名或密码错误",
             type: "error",
           });
