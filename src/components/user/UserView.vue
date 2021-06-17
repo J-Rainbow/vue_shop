@@ -23,7 +23,8 @@
       </el-row>
 
       <el-table :data="userList" style="width: 100%" stripe border>
-        <el-table-column type="index" width="50" label="编号"> </el-table-column>
+        <el-table-column type="index" width="50" label="编号">
+        </el-table-column>
         <el-table-column
           prop="username"
           label="姓名"
@@ -57,13 +58,14 @@
             </el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="180">
           <template v-slot:default="scope">
             <el-button
               v-model="scope.row"
               type="primary"
               icon="el-icon-edit"
               size="mini"
+              @click="showEditDialog(scope.row)"
             ></el-button>
             <el-button
               v-model="scope.row"
@@ -72,19 +74,19 @@
               size="mini"
               @click="deleteUser(scope.row)"
             ></el-button>
+            <el-tooltip
+              effect="dark"
+              content="分配角色"
+              placement="top"
+              :enterable="false"
+            >
+              <el-button
+                type="warning"
+                icon="el-icon-setting"
+                size="mini"
+              ></el-button>
+            </el-tooltip>
           </template>
-          <!-- <el-tooltip
-            effect="dark"
-            content="分配角色"
-            placement="top"
-            :enterable="false"
-          >
-            <el-button
-              type="warning"
-              icon="el-icon-setting"
-              size="mini"
-            ></el-button>
-          </el-tooltip> -->
         </el-table-column>
       </el-table>
 
@@ -101,7 +103,7 @@
       </el-pagination>
     </el-card>
 
-    <!--弹窗-->
+    <!--添加用户弹窗-->
     <!-- :visible.sync="true" 是否显示-->
     <el-dialog title="添加用户" :visible.sync="isdialog" width="30%">
       <el-form :model="from" label-width="80px" :rules="formRules">
@@ -121,6 +123,26 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="isdialog = false">取 消</el-button>
         <el-button type="primary" @click="addFrom">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!--修改用户弹窗-->
+    <!-- :visible.sync="true" 是否显示-->
+    <el-dialog title="修改用户" :visible.sync="isShowEditDialog" width="30%">
+      <el-form :model="from" label-width="80px" :rules="formRules">
+        <el-form-item label="用户名">
+          <el-input v-model="from.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="from.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机" prop="mobile">
+          <el-input v-model="from.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowEditDialog = false">取 消</el-button>
+        <el-button type="primary" @click="editUser">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -147,6 +169,7 @@ export default {
       userList: [],
       total: 5,
       isdialog: false,
+      isShowEditDialog: false,
       pageInfo: {
         //每页条数
         pageSize: 5,
@@ -172,6 +195,17 @@ export default {
     },
     addUserDialog() {
       this.isdialog = true;
+    },
+    async showEditDialog(val) {
+      this.isShowEditDialog = true;
+      let id = { id: val.id };
+      await axios({
+        method: "POST",
+        url: "/api/user/findUserById",
+        params: id,
+      }).then((res) => {
+        this.from = res.data;
+      });
     },
     //修改用户状态
     async userStateChange(val) {
@@ -249,6 +283,46 @@ export default {
         this.getUserList();
       });
     },
+
+    //修改用户
+    async editUser() {
+      if (this.from.email == "" || this.from.mobile == "") {
+        return;
+      }
+      const confirmResult = await this.$confirm(
+        "此操作将永久修改该用户, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+      //点击确定返回confirm 点击取消返回cancel 如果不加async+await返回的是一个premise
+      if (confirmResult !== "confirm") {
+        this.$message({
+          message: "取消修改",
+          type: "info",
+        });
+        return;
+      }
+      await axios({
+        method: "POST",
+        url: "/api/user/editUser",
+        params: this.from,
+      }).then((res) => {
+        if (res.data.num == 1) {
+          this.$message({
+            message: "修改成功",
+            type: "success",
+          });
+        }
+        this.getUserList();
+        this.isShowEditDialog = false;
+      });
+    },
+    //根据id查询用户
+    findUserById() {},
     //获取用户数据
     async getUserList() {
       await axios({
