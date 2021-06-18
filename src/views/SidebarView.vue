@@ -46,12 +46,12 @@
             <span>角色列表</span>
           </template>
         </el-menu-item>
-        <el-menu-item :index="'/powerList'">
+        <!-- <el-menu-item :index="'/powerList'">
           <template slot="title">
             <i class="el-icon-menu"></i>
             <span>权限列表</span>
           </template>
-        </el-menu-item>
+        </el-menu-item> -->
       </el-submenu>
 
       <el-submenu index="3">
